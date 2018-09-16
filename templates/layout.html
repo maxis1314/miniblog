@@ -1,0 +1,43 @@
+<!doctype html>
+<title>{% block title %}Welcome{% endblock %}</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+  <h1>Memo {{session.table}}</h1>
+  <div class=navigation>
+  {% if g.user %}
+    <a href="{{ url_for('memo.timeline') }}">my timeline</a> |
+    <a href="{{ url_for('memo.public_timeline') }}">public timeline</a> |
+    <a href="{{ url_for('memo.logout') }}">sign out [{{ g.user.username }}]</a>
+  {% else %}
+    <a href="{{ url_for('memo.public_timeline') }}">public timeline</a> |
+    <a href="{{ url_for('memo.register') }}">sign up</a> |
+    <a href="{{ url_for('memo.login') }}">sign in</a>
+  {% endif %}
+  </div>
+  {% with flashes = get_flashed_messages() %}
+    {% if flashes %}
+      <ul class=flashes>
+      {% for message in flashes %}
+        <li>{{ message }}
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <div class=body>
+  {% block body %}{% endblock %}
+  </div>
+  <div class=footer>
+    M{{count}} &mdash; A Flask Application
+    {% if g.user %}
+    <form action="{{ url_for('memo.select_notebook') }}" method=post>
+          <p>
+          <select name=text>
+          {% for table in tables %}
+          <option value='{{table}}' {% if session.table == table %}selected{% else %}{% endif %}>{{table}}</option>
+          {% endfor %}
+          </select> <input type=text name=newtable placeholder=new>
+          <input type=submit value="Select">
+    </form>
+    {% endif %}
+  </div>
+</div>

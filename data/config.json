@@ -1,0 +1,11 @@
+{
+    "current": "private",
+    "tables": [
+        "home"
+    ],
+    "user:admin": {
+        "username": "admin",
+        "pw_hash": "sha1$K7g6XQgn$80de6c64ce907de32e60c28546a4c539fd53f696",
+        "email": "a@a.com"
+    }
+}

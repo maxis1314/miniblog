@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if request.endpoint == 'public_timeline' %}
+    Public Timeline
+  {% elif request.endpoint == 'user_timeline' %}
+    {{ profile_user.username }}'s Timeline
+  {% else %}
+    My Timeline
+  {% endif %}
+{% endblock %}
+{% block body %}
+  <h2>{{ self.title() }}</h2>
+  {% if g.user %}
+    {% if request.endpoint == 'user_timeline' %}
+      <div class=followstatus>
+      {% if g.user.user_id == profile_user.user_id %}
+        This is you!
+      {% elif followed %}
+        You are currently following this user.
+        <a class=unfollow href="{{ url_for('memo.unfollow_user', username=profile_user.username)
+          }}">Unfollow user</a>.
+      {% else %}
+        You are not yet following this user.
+        <a class=follow href="{{ url_for('memo.follow_user', username=profile_user.username)
+          }}">Follow user</a>.
+      {% endif %}
+      </div>
+    {% elif request.endpoint == 'memo.timeline' or request.endpoint == 'memo.search_message' %}
+      <div class=twitbox>
+        <form action="{{ url_for('memo.search_message') }}" method=post>
+          <p><input type=text  name=text size=60 value='{{key}}'><!--
+          --><input type=submit value="Search">
+        </form>        
+        
+        <h3>What's on your mind {{ g.user.username }}?</h3>
+        <form action="{{ url_for('memo.add_message') }}" method=post>
+          <p><textarea  name=text rows=10 cols=80></textarea><br><!--
+          -->
+          <select name=table>
+          {% for table in tables %}
+          <option value='{{table}}' {% if session.table == table %}selected{% else %}{% endif %}>{{table}}</option>
+          {% endfor %}
+          <input type=submit value="Share">
+        </form>
+      </div>
+    {% endif %}
+  {% endif %}
+  <ul class=messages>
+  
+  {% if keywords %}
+  <li>
+    {% for keyword in keywords %}
+    {{keyword|safe}},
+    {% endfor %}
+  </li>
+  {% endif%}
+  
+  {% for message in messages %}
+    <li><p>
+      <strong><a href="{{ url_for('memo.user_timeline', username=message.username)
+      }}">{{ message.username }}</a></strong>
+      
+      <strong style="display:block;float:right"><a  onclick="return confirm('Are you sure you want to delete item:{{message.id}}?');" href="{{ url_for('memo.delete_message', msgid=message.id, page=page, from=request.endpoint, user=profile_user.username if profile_user else '')}}">DEL</a></strong>
+      <pre>{{ message.text | safe}}</pre>
+      <small><a href="{{ url_for('memo.message', id=message.id) }}">[DETAIL]</a>&mdash; {{ message.pub_date|datetimeformat }} - <a href="{{ url_for('memo.cluster',id=message.cluster) }}">{{message.cluster}}</a></small>
+      {{message.table}}
+  {% else %}
+    <li><em>There's no message so far.</em>
+  {% endfor %}
+  </ul>
+  {% if page >0 %}<a href="{{ url_for('memo.timeline', page=page-1 if page>1 else 0) }}">PREV</a>{% endif %} 
+  {% if messages|length >0 %}<a href="{{ url_for('memo.timeline', page=page+1) }}">NEXT</a>{% endif %}
+{% endblock %}
